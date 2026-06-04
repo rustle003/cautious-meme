@@ -1,0 +1,33 @@
+[build-system]
+requires = ["flit_core >= 3.12.0, <4", "huggingface_hub >= 1.14.0, < 2"]
+build-backend = "flit_core.buildapi"
+#requires = ["uv_build >= 0.11.7, <0.12.0"]
+#build-backend = "uv_build"
+
+[project]
+#dynamic = ["version"]
+version = "0.1.0"
+name = "cautious-meme"
+requires-python = ">= 3.13"
+description = "Attempt at running whisper_large_v3_turbo locally."
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = [ "LICENSE" ]
+keywords = [ "whisper", "local-test" ]
+classifiers = [
+ "Development Status :: 3 - Alpha"
+]
+dependencies = [
+	"transformers>=5.7.0",
+	"torch>=2.11.0",
+	"pandas>=3.0.2",
+	"numpy>=2.4.4"
+]
+
+[project.urls]
+Repository = "https://github.com/rustle003/cautious-meme.git"
+
+[model-repo]
+repo_id = "openai/whisper-large-v3-turbo"
+download_path = "../model"
+repo_provider = "huggingface"
