@@ -26,8 +26,3 @@ dependencies = [
 
 [project.urls]
 Repository = "https://github.com/rustle003/cautious-meme.git"
-
-[model-repo]
-repo_id = "openai/whisper-large-v3-turbo"
-download_path = "../model"
-repo_provider = "huggingface"
