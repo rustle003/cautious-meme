@@ -17,11 +17,11 @@ class RepoConfig:
     @classmethod
     def from_toml(cls: Type["RepoConfig"], config: dict[str,Any]) -> "RepoConfig":
         return cls(
-            repo_id=config["model-repo"]["repo_id"],
-            repo_provider=config["model-repo"]["repo-provider"]["provider"],
-            repo_file=config["model-repo"]["repo_file"] if "repo_file" in config["model-repo"] else "",
-            download_path=config["model-repo"]["download_path"] if "download_path" in config["model-repo"] else "",
-            revision=config["model-repo"]["revision"] if "revision" in config["model-repo"] else ""
+            repo_id=config["repo_id"],
+            repo_provider=config["repo-provider"]["provider"],
+            repo_file=config["repo_file"] if "repo_file" in config else "",
+            download_path=config["download_path"] if "download_path" in config else "",
+            revision=config["revision"] if "revision" in config else ""
         )
 
 
@@ -29,13 +29,6 @@ class RepoInterface(Protocol):
     def clone_repo(self: "RepoInterface", repo_id: str, download_path: str = "", revision ="") -> None: ...
     def pull_file(self: "RepoInterface", repo_id: str, file_name: str, download_path: str = "", revision ="") -> None: ...
     def validate_configuration(cls: Type["RepoInterface"], config: RepoConfig) -> None: ...
-    def _create_path(self: "repoInterface", path: str) -> Path | Exception:
-        maybe_path: Path = Path(path)
-        if maybe_path.exists():
-            return maybe_path
-        raise FileNotFoundError(f"'${path}' does not exist, there are insufficient" +
-                                "permissions to access the file or a parent directory, " +
-                                "or the file name contains invalid characters.")
 
 
 class RepoFetchResolver[T : RepoInterface]:

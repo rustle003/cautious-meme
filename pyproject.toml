@@ -1,11 +1,8 @@
 [build-system]
 requires = ["flit_core >= 3.12.0, <4", "huggingface_hub >= 1.14.0, < 2"]
 build-backend = "flit_core.buildapi"
-#requires = ["uv_build >= 0.11.7, <0.12.0"]
-#build-backend = "uv_build"
 
 [project]
-#dynamic = ["version"]
 version = "0.1.0"
 name = "cautious-meme"
 requires-python = ">= 3.13"
@@ -26,3 +23,6 @@ dependencies = [
 
 [project.urls]
 Repository = "https://github.com/rustle003/cautious-meme.git"
+
+[project.scripts]
+download_model = "cautious_meme.model_downloader:model_downloader.orchestrate_model_download"

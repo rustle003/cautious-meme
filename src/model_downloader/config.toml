@@ -1,8 +1,0 @@
-[model-repo]
-repo_id = "openai/whisper-large-v3-turbo"
-download_path = "../model"
-#repo_provider = "huggingface"
-
-[model-repo.repo-provider]
-provider = "huggingface"
-dependencies = ["huggingface_hub==1.13.0"]

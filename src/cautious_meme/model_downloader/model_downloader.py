@@ -32,7 +32,7 @@ class VenvManager:
         VenvManager._rmdir(Path(self.venv_dir))
 
     def _find_existing_venv(self: "VenvManager") -> str | None:
-        for possible_env in Path.cwd().glob(f"{self.prefix}_??????????????"):
+        for possible_env in Path.cwd().glob(f".{self.prefix}_??????????????"):
             if possible_env.is_dir():
                 return possible_env.as_posix()
         return None
@@ -55,7 +55,7 @@ class VenvManager:
         dir_path.rmdir()
 
 
-# Downloads dependencies in an existing virtual environment and add the dependencies to the module path
+# Download dependencies in an existing virtual environment and add the dependencies to the module path
 def bootstrap_model_downloader(venv_dir: str, dependencies: list[str]) -> None:
     # download dependencies
     subprocess.check_call([f"{venv_dir}/bin/pip", "install"] + dependencies, shell=False)
@@ -68,34 +68,37 @@ def bootstrap_model_downloader(venv_dir: str, dependencies: list[str]) -> None:
 
 
 def load_config_from_resources() -> dict[str,Any]:
-    config_text: str = importlib.resources.read_text("model_downloader", "config.toml")
+    config_text: str = importlib.resources.read_text("cautious_meme.model_downloader", "config.toml")
     return tomllib.loads(config_text)
 
 
-def orchestrate_model_download(args: list[str]) -> int:
+def orchestrate_model_download(argv: list[str] = None) -> int:
     config: dict[str,Any] = load_config_from_resources()
 
     venv_manager: VenvManager = VenvManager("model_downloader")
     venv_manager.create_venv()
 
-    try:
-        bootstrap_model_downloader(venv_manager.get_venv_dir(), config["model-repo"]["repo-provider"]["dependencies"])
-    except subprocess.CalledProcessError | RuntimeError as e:
-        print(
-            "Unable to download huggingface_hub dependency or " +
-            "unable to access the hugging_face module in virtual " +
-            f"environment: {venv_manager.get_venv_dir()}"
-        )
-        return 1
+    exit_code: int = 0
+    for model_repo_config in config["model-repo"]:
+        try:
+                bootstrap_model_downloader(venv_manager.get_venv_dir(), model_repo_config["repo-provider"]["dependencies"])
+        except subprocess.CalledProcessError | BaseException as e:
+            print(
+                f"Unable to download dependencies for {model_repo_config["repo-provider"]["provider"]} or " +
+                "unable to access the dependency modules in virtual " +
+                f"environment: {venv_manager.get_venv_dir()}"
+            )
+            return 1
 
-    # import repo_interface
-    import repo_interface
-    # call and return repo_interface.main(args)
-    exit_code: int = repo_interface.download_model(config)
-    # delete temporary environment used for pulling AI model
-    venv_manager.remove_venv()
+        # TODO: Will need to import modules based on repo-provider which will mean moving out concrete repo_interface implementations to separate files
+        # import repo_interface
+        import repo_interface
+        # call and return repo_interface.main(args)
+        exit_code: int = exit_code + repo_interface.download_model(model_repo_config)
+        # delete temporary environment used for pulling AI model
+        venv_manager.remove_venv()
 
     return exit_code
 
 if __name__ == "__main__":
-    sys.exit(orchestrate_model_download(sys.argv[1:]))
+    sys.exit(orchestrate_model_download(sys.argv))
