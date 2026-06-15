@@ -69,8 +69,16 @@ def bootstrap_model_downloader(venv_dir: str, dependencies: list[str]) -> None:
 
 def load_config_from_resources() -> dict[str,Any]:
     config_text: str = importlib.resources.read_text("cautious_meme.model_downloader", "config.toml")
-    return tomllib.loads(config_text)
+    return make_download_path_absolute(tomllib.loads(config_text))
 
+def make_download_path_absolute(config: dict[str,Any]) -> dict[str,Any]:
+    for model_repo_config in config["model-repo"]:
+        with importlib.resources.path("cautious_meme", "models") as model_dir:
+            model_repo_config["download_path"] = model_repo_config["download_path"] \
+                if model_repo_config["download_path"] is None or model_repo_config["download_path"].startswith("/") \
+                else model_dir.joinpath(model_repo_config["download_path"]).as_posix()
+
+    return config
 
 def orchestrate_model_download(argv: list[str] = None) -> int:
     config: dict[str,Any] = load_config_from_resources()
